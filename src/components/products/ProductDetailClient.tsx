@@ -1,0 +1,228 @@
+"use client";
+
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useRecentlyViewed } from "@/lib/hooks/useRecentlyViewed";
+import { useToast } from "@/components/ui/Toast";
+import { Product } from "@/lib/types";
+import Modal from "@/components/ui/Modal";
+import ProductCard from "./ProductCard";
+import Image from "next/image";
+import Link from "next/link";
+import { AlertCircle, ChevronRight, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface Props {
+  product: Product;
+  relatedProducts: Product[];
+}
+
+export default function ProductDetailClient({ product, relatedProducts }: Props) {
+  const { user } = useAuth();
+  const { addProduct } = useRecentlyViewed();
+  const { showToast } = useToast();
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportType, setReportType] = useState<"info" | "link">("info");
+  const [reportDesc, setReportDesc] = useState("");
+  const [reporting, setReporting] = useState(false);
+
+  // 페이지 진입 시 최근 본 상품 localStorage 추가
+  useEffect(() => {
+    addProduct(product);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleGoToCoupang = () => {
+    // 클릭수 증가 + DB 최근 본 상품 기록
+    fetch("/api/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product_id: product.id }),
+    });
+    window.open(product.external_url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleReport = (type: "info" | "link") => {
+    if (!user) {
+      showToast("로그인 후 이용할 수 있습니다.", "error");
+      return;
+    }
+    setReportType(type);
+    setReportModalOpen(true);
+  };
+
+  const submitReport = async () => {
+    setReporting(true);
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product_id: product.id,
+          type: reportType,
+          description: reportDesc,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setReportModalOpen(false);
+      setReportDesc("");
+      showToast("오류 제기가 접수되었습니다. 감사합니다.", "success");
+    } catch {
+      showToast("오류 제기에 실패했습니다.", "error");
+    } finally {
+      setReporting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-8">
+      {/* 브레드크럼 */}
+      <nav className="flex items-center gap-1 text-sm text-gray-400 flex-wrap">
+        <Link href="/" className="hover:text-gray-600 shrink-0">
+          홈
+        </Link>
+        {product.category && (
+          <>
+            <ChevronRight size={14} className="shrink-0" />
+            <span className="shrink-0">{product.category.name}</span>
+          </>
+        )}
+        <ChevronRight size={14} className="shrink-0" />
+        <span className="text-gray-700 truncate">{product.title}</span>
+      </nav>
+
+      {/* 상품 상세 */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        {/* 이미지 */}
+        {product.image_url && (
+          <div className="relative aspect-video bg-gray-50">
+            <Image
+              src={product.image_url}
+              alt={product.title}
+              fill
+              className="object-contain p-4"
+              priority
+              sizes="(max-width: 768px) 100vw, 672px"
+            />
+          </div>
+        )}
+
+        <div className="p-6 space-y-4">
+          {/* 카테고리 */}
+          {product.category && (
+            <span className="badge bg-blue-50 text-blue-600 text-xs">
+              {product.category.name}
+            </span>
+          )}
+
+          {/* 제목 */}
+          <h1 className="text-xl font-bold text-gray-900 leading-snug">
+            {product.title}
+          </h1>
+
+          {/* 설명 */}
+          {product.description && (
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+              {product.description}
+            </p>
+          )}
+
+          {/* 쿠팡 이동 버튼 */}
+          <button
+            onClick={handleGoToCoupang}
+            className="w-full btn-primary py-3 text-base flex items-center justify-center gap-2 mt-2"
+          >
+            <ExternalLink size={18} />
+            쿠팡에서 보기
+          </button>
+
+          {/* 오류 신고 */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-50">
+            <span className="text-xs text-gray-300">오류 신고</span>
+            <button
+              onClick={() => handleReport("info")}
+              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5 transition-colors"
+            >
+              <AlertCircle size={12} />
+              정보오류
+            </button>
+            <span className="text-gray-200">|</span>
+            <button
+              onClick={() => handleReport("link")}
+              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5 transition-colors"
+            >
+              <AlertCircle size={12} />
+              링크오류
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 연관 상품 */}
+      {relatedProducts.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-gray-900">
+            같은 카테고리 상품
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 오류 제기 모달 */}
+      <Modal
+        isOpen={reportModalOpen}
+        onClose={() => {
+          setReportModalOpen(false);
+          setReportDesc("");
+        }}
+        title={reportType === "info" ? "상품 정보 오류 제기" : "링크 오류 제기"}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-sm font-medium text-gray-900 line-clamp-1">
+              {product.title}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {reportType === "info"
+                ? "상품 정보에 오류가 있는 경우 제기해주세요."
+                : "링크가 작동하지 않는 경우 제기해주세요."}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              상세 내용 (선택)
+            </label>
+            <textarea
+              value={reportDesc}
+              onChange={(e) => setReportDesc(e.target.value)}
+              placeholder="오류 내용을 자세히 입력해주세요..."
+              className="input resize-none h-24"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setReportModalOpen(false);
+                setReportDesc("");
+              }}
+              className="btn-secondary flex-1"
+            >
+              취소
+            </button>
+            <button
+              onClick={submitReport}
+              disabled={reporting}
+              className="btn-primary flex-1"
+            >
+              {reporting ? "제출 중..." : "제출"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}

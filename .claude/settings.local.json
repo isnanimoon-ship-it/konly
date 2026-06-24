@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Remove-Item -Recurse -Force \"d:\\\\유틸\\\\CP_M\\\\src\\\\app\\\\\\(main\\)\\\\products\\\\[id]\")"
+    ]
+  }
+}

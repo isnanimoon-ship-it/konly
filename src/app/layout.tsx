@@ -1,0 +1,53 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import { ToastProvider } from "@/components/ui/Toast";
+import VisitorTracker from "@/components/VisitorTracker";
+import { createClient } from "@/lib/supabase/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "site_name")
+    .single();
+  const siteName = data?.value ?? "쇼핑링크";
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const description = "국내산 제품만 모은 쿠팡 쇼핑 링크 모음";
+
+  return {
+    title: { template: `%s | ${siteName}`, default: siteName },
+    description,
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      siteName,
+      title: siteName,
+      description,
+      url: siteUrl,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: siteName,
+      description,
+    },
+  };
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ko" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <ToastProvider>
+          <VisitorTracker />
+          {children}
+        </ToastProvider>
+      </body>
+    </html>
+  );
+}
