@@ -32,12 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) return { title: "상품을 찾을 수 없습니다" };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const siteName = siteSetting?.value ?? "쇼핑링크";
   const description =
     product.description ||
     `${product.category?.name ? product.category.name + " " : ""}${product.title} - 국내산 제품 쿠팡 최저가 링크`;
-  const productUrl = `${siteUrl}/products/${slug}`;
 
   return {
     title: product.title,
@@ -48,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName,
       title: `${product.title} | ${siteName}`,
       description,
-      url: productUrl,
+      url: `/products/${slug}`,
       images: product.image_url
         ? [{ url: product.image_url, alt: product.title }]
         : [],
@@ -60,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: product.image_url ? [product.image_url] : [],
     },
     alternates: {
-      canonical: productUrl,
+      canonical: `/products/${slug}`,
     },
   };
 }

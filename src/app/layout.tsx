@@ -13,10 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
     .single();
   const siteName = data?.value ?? "쇼핑링크";
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.konly.co.kr";
   const description = "국내산 제품만 모은 쿠팡 쇼핑 링크 모음";
 
   return {
+    metadataBase: new URL(siteUrl),
     title: { template: `%s | ${siteName}`, default: siteName },
     description,
     openGraph: {
@@ -25,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName,
       title: siteName,
       description,
-      url: siteUrl,
+      url: "/",
     },
     twitter: {
       card: "summary_large_image",
