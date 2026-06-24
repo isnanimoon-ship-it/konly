@@ -29,7 +29,13 @@ async function StatCard({
 export default async function ManageDashboard() {
   const supabase = await createClient();
 
-  const today = new Date().toISOString().split("T")[0];
+  // 서버는 UTC 기준이므로 KST(+9) 날짜를 직접 계산
+  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const today = kstNow.toISOString().slice(0, 10); // KST 기준 오늘 날짜
+
+  // KST 자정~23:59를 UTC ISO로 변환해서 쿼리
+  const todayStart = new Date(`${today}T00:00:00+09:00`).toISOString();
+  const todayEnd = new Date(`${today}T23:59:59+09:00`).toISOString();
 
   const [
     { count: totalProducts },
@@ -48,8 +54,8 @@ export default async function ManageDashboard() {
     supabase
       .from("visitor_logs")
       .select("*", { count: "exact", head: true })
-      .gte("visited_at", `${today}T00:00:00`)
-      .lte("visited_at", `${today}T23:59:59`),
+      .gte("visited_at", todayStart)
+      .lte("visited_at", todayEnd),
     supabase
       .from("reports")
       .select("*", { count: "exact", head: true })
