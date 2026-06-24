@@ -33,6 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: siteName,
       description,
     },
+    other: {
+      "naver-site-verification": "fb80f879f4a844dffe23ce60d6b08c621939b7a7",
+    },
   };
 }
 
