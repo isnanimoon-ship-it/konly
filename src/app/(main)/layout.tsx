@@ -1,6 +1,7 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { createClient } from "@/lib/supabase/server";
+import { AuthProvider } from "@/lib/context/AuthContext";
 
 export default async function MainLayout({
   children,
@@ -17,12 +18,14 @@ export default async function MainLayout({
   const siteName = settings?.value ?? "쇼핑링크";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header siteName={siteName} />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header siteName={siteName} />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
