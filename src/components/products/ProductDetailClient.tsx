@@ -135,6 +135,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             쿠팡에서 보기
           </button>
 
+          {/* 파트너스 고지 */}
+          <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+            이 링크는 쿠팡 파트너스 활동의 일환으로 수수료를 받을 수 있습니다.
+          </p>
+
           {/* 오류 신고 */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-50">
             <span className="text-xs text-gray-300">오류 신고</span>
