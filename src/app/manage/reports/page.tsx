@@ -40,7 +40,7 @@ export default function ReportsManagePage() {
     }
 
     const { data } = await query;
-    setReports((data as ReportWithProduct[]) ?? []);
+    setReports((data as unknown as ReportWithProduct[]) ?? []);
     setLoading(false);
   };
 
