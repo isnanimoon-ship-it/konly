@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = data?.value ?? "쇼핑링크";
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.konly.co.kr";
-  const description = "국내산 제품만 모은 쿠팡 쇼핑 링크 모음";
+  const description = "국내 생산 상품만 직접 검수해 모았습니다. 중국산 걱정 없이 Made in Korea 상품을 카테고리별로 찾아보세요.";
 
   return {
     metadataBase: new URL(siteUrl),
