@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CategoryFilter from "./CategoryFilter";
 import ProductCard from "./ProductCard";
+import HeroSection from "@/components/layout/HeroSection";
 
 interface HomeClientProps {
   categories: Category[];
@@ -93,6 +94,18 @@ export default function HomeClient({
   }, [hasMore, loading, page, selectedParentId, selectedChildId, searchQuery]);
 
   return (
+    <>
+    {/* 검색 중이 아닐 때만 히어로 표시 */}
+    {!searchQuery && selectedParentId === null && (
+      <HeroSection
+        categories={categories}
+        onSelectParent={(id) => {
+          setSelectedParentId(id);
+          setSelectedChildId(null);
+        }}
+      />
+    )}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-start">
       {/* 카테고리 사이드바 */}
       <aside className="w-full lg:w-44 lg:shrink-0 lg:sticky lg:top-24">
@@ -174,5 +187,7 @@ export default function HomeClient({
         )}
       </div>
     </div>
+    </div>
+    </>
   );
 }

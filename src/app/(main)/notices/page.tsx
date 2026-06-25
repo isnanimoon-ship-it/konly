@@ -12,6 +12,7 @@ export default async function NoticesPage() {
     .order("created_at", { ascending: false });
 
   return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center gap-2">
         <Bell size={20} className="text-gray-400" />
@@ -53,6 +54,7 @@ export default async function NoticesPage() {
           <p className="text-sm text-gray-500">등록된 공지사항이 없습니다</p>
         </div>
       )}
+    </div>
     </div>
   );
 }
